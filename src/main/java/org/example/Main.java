@@ -1,11 +1,16 @@
 package org.example;
 
+import org.example.Excel.ExcelParser;
+import org.example.Excel.ExcelReader;
+
 import java.sql.SQLOutput;
 import java.util.Scanner;
+
 
 public class Main
 {
 	public static Scanner sc = new Scanner(System.in);
+	public static ExcelReader excelReader = new ExcelReader();
 	
 	public static void main(String[] args)
 	{
@@ -19,16 +24,32 @@ public class Main
 			System.out.println("2) Внесите необходимые данные в шаблон (Board Cutter закроется)");
 			System.out.println();
 			System.out.println("3) Запустите Board Cutter еще раз, он увидит изменения в файле (Перемещать или переименовывать файл нельзя, Board Cutter его потеряет)");
-			System.out.println("4) Продолжите работу с настройками");
+			System.out.println("4) Подтвердите начало вычислений");
 			System.out.println();
 			
 			if(FileSaver.isFileExist())
 			{
 				System.out.println("Файл шаблона обнаружен, Вы находитесь на 4 пункте");
-			}else
+				System.out.println("Расположение файла: " + FileSaver.outPath + FileSaver.TEMPLATE_NAME);
+				excelReader.readAllData();
+				System.out.println();
+				System.out.println("Почитаны данные:");
+				System.out.println("Материалы: " + excelReader.materials.size() + " шт");
+				System.out.println("Марки: " + excelReader.markings.size() + " шт");
+				
+				System.out.println();
+				System.out.println("Начать расчет оптимального раскроя? (Y/N)");
+				
+			}
+			else
 			{
 				System.out.println("Файл шаблона не обнаружен, Вы находитесь на 1 пункте");
-				saveOrNot();
+				
+				FileSaver.saveWithStreams();
+				System.out.println();
+				System.out.println("Файл успешно получен и расположен по пути: " + FileSaver.outPath + FileSaver.TEMPLATE_NAME);
+				System.out.println("Внесите в него изменения и снова зайдите в Board Cutter");
+				
 			}
 			
 			sc.nextLine();
@@ -45,12 +66,15 @@ public class Main
 	
 	private static void saveOrNot()
 	{
-		System.out.println("Скачать файл? (Y/N)");
+		System.out.println("");
 		System.out.print("- ");
 		
 		String answer = sc.nextLine();
 		
-		if(answer.equalsIgnoreCase("Y")) FileSaver.saveWithStreams();
+		if(answer.equalsIgnoreCase("Y"))
+		{
+		
+		}
 		else if(answer.equalsIgnoreCase("N")) FileSaver.noSave();
 		else
 		{
@@ -58,5 +82,22 @@ public class Main
 			System.out.println("Введите символ \"Y\" для скачаивания или \"N\" для отмены!");
 			saveOrNot();
 		}
+	}
+	
+	private static boolean change(String text)
+	{
+		System.out.println(text);
+		System.out.print("- ");
+		String answer = sc.nextLine();
+		
+		if(answer.equalsIgnoreCase("Y")) return true;
+		else if(answer.equalsIgnoreCase("N")) return false;
+		else
+		{
+			System.out.println();
+			System.out.println("Введите символ \"Y\" для скачаивания или \"N\" для отмены!");
+			change(text);
+		}
+		return true;
 	}
 }

@@ -1,5 +1,10 @@
 package org.example;
 
+import org.apache.poi.EmptyFileException;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.example.Excel.ExcelParser;
+
+import javax.lang.model.element.Name;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -8,8 +13,8 @@ import java.nio.file.StandardCopyOption;
 
 public class FileSaver
 {
-	private static String outPath;
-	private static final String TEMPLATE_NAME = "Boards Cutter template.xlsx";
+	public static String outPath;
+	public static final String TEMPLATE_NAME = "Boards Cutter template.xlsx";
 	
 	static
 	{
@@ -49,7 +54,23 @@ public class FileSaver
 	
 	public static boolean isFileExist()
 	{
-		return new File(outPath).exists();
+		ExcelParser parser;
+		
+		File excelBookFile = new File(outPath + TEMPLATE_NAME);
+		try
+		{
+			parser = new ExcelParser(excelBookFile);
+		}
+		catch(EmptyFileException e)
+		{
+			System.out.println("Файл поврежден, необходимо загрузить его заново");
+			return false;
+		}
+		catch(IOException e)
+		{
+			return false;
+		}
+		return true;
 	}
 	
 	public static void noSave()
