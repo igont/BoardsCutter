@@ -1,9 +1,7 @@
 package org.example;
 
-import org.example.Excel.ExcelParser;
 import org.example.Excel.ExcelReader;
 
-import java.sql.SQLOutput;
 import java.util.Scanner;
 
 
@@ -26,6 +24,7 @@ public class Main
 			System.out.println("3) Запустите Board Cutter еще раз, он увидит изменения в файле (Перемещать или переименовывать файл нельзя, Board Cutter его потеряет)");
 			System.out.println("4) Подтвердите начало вычислений");
 			System.out.println();
+			System.out.println();
 			
 			if(FileSaver.isFileExist())
 			{
@@ -38,7 +37,14 @@ public class Main
 				System.out.println("Марки: " + excelReader.markings.size() + " шт");
 				
 				System.out.println();
-				System.out.println("Начать расчет оптимального раскроя? (Y/N)");
+				//boolean start = change("Начать расчет оптимального раскроя? (Y/N)");
+				boolean start = true;
+				
+				if(start)
+				{
+					Calculator calculator = new Calculator(excelReader.materials, excelReader.markings);
+					calculator.calculateAll();
+				}
 				
 			}
 			else
