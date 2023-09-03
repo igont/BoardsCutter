@@ -16,7 +16,7 @@ public class ExcelReader
 	public void readAllData()
 	{
 		File excelBookFile = new File(FileSaver.outPath + FileSaver.TEMPLATE_NAME);
-		ExcelParser parser = null;
+		ExcelParser parser;
 		try
 		{
 			parser = new ExcelParser(excelBookFile);

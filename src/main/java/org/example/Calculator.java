@@ -1,9 +1,9 @@
 package org.example;
 
-import org.example.Comparators.SortByCount;
 import org.example.Comparators.SortBySumLength;
 import org.example.DataTypes.Marking;
 import org.example.DataTypes.Material;
+import org.example.DataTypes.Statistics;
 
 import java.util.*;
 
@@ -14,6 +14,7 @@ public class Calculator
 	public List<Marking> markings;
 	public List<List<Marking>> splitMarkings = new ArrayList<>();
 	public int allowedAmount = 500;
+	public Statistics statistics = new Statistics();
 	
 	public Calculator(List<Material> materials, List<Marking> markings)
 	{
@@ -21,8 +22,10 @@ public class Calculator
 		this.markings = markings;
 	}
 	
-	public void calculateAll()
+	public Statistics calculateAll()
 	{
+		long startTime = System.nanoTime();
+		
 		splitMarkings();
 		
 		for(List<Marking> markings1 : splitMarkings)
@@ -31,6 +34,18 @@ public class Calculator
 			System.out.println("Выполнен расчет для материала: " + markings1.get(0).material.name);
 			System.out.println();
 		}
+		
+		long endTime = System.nanoTime();
+		long duration = (endTime - startTime);
+		
+		statistics.durationMillis = duration / 1000f;
+		
+		//printResults();
+		return statistics;
+	}
+	
+	private void printResults()
+	{
 		
 		List<List<Marking>> list = new ArrayList<>(allowedCombinations.stream().toList());
 		list.sort(new SortBySumLength());
@@ -44,10 +59,10 @@ public class Calculator
 	public void calculateSingleMaterial(List<Marking> markings) // Выполняет все расчеты для одного материала
 	{
 		List<Marking> sample = new ArrayList<>();
-		checkAmount(sample, markings);
+		addNewMark(sample, markings);
 	}
 	
-	private void checkAmount(List<Marking> sample, List<Marking> markings) // Добавляет к существующей раскладке каждую из марок набора
+	private void addNewMark(List<Marking> sample, List<Marking> markings) // Добавляет к существующей раскладке каждую из марок набора
 	{
 		for(Marking marking : markings)
 		{
@@ -55,6 +70,8 @@ public class Calculator
 			sampleNew.add(marking);
 			
 			checkRest(sampleNew, markings);
+			
+			statistics.combinations++;
 		}
 	}
 	
@@ -81,7 +98,7 @@ public class Calculator
 		else
 		{
 			//printCombination("[CONTINUE]", sample);
-			checkAmount(sample, markings);
+			addNewMark(sample, markings);
 		}
 	}
 	

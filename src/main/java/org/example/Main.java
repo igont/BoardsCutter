@@ -1,7 +1,11 @@
 package org.example;
 
+import org.example.DataTypes.Statistics;
 import org.example.Excel.ExcelReader;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.Locale;
 import java.util.Scanner;
 
 
@@ -42,8 +46,17 @@ public class Main
 				
 				if(start)
 				{
+					
+					
 					Calculator calculator = new Calculator(excelReader.materials, excelReader.markings);
-					calculator.calculateAll();
+					Statistics statistics = calculator.calculateAll();
+					
+					DecimalFormat df = new DecimalFormat("#.###");
+					df.setRoundingMode(RoundingMode.CEILING);
+					
+					System.out.println();
+					System.out.println("Времяни затрачено: " + df.format(statistics.durationMillis/1000000) + " сек");
+					System.out.println("Найдено комбинаций: " + String.format(Locale.US,"%,d", statistics.combinations));
 				}
 				
 			}
