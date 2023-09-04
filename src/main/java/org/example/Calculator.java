@@ -5,13 +5,14 @@ import org.example.Comparators.Markings.SortMarksByLength;
 import org.example.Comparators.Print.SortBySumLength;
 import org.example.DataTypes.Marking;
 import org.example.DataTypes.Material;
+import org.example.DataTypes.Sample;
 import org.example.DataTypes.Statistics;
 
 import java.util.*;
 
 public class Calculator
 {
-	public List<List<Marking>> solution = new ArrayList<>();
+	public List<Sample> solution = new ArrayList<>();
 	public List<Material> materials;
 	public List<Marking> markings;
 	public List<List<Marking>> splitMarkings = new ArrayList<>();
@@ -45,18 +46,14 @@ public class Calculator
 	
 	private void printResults()
 	{
-		List<List<Marking>> list = new ArrayList<>(solution.stream().toList());
-		list.sort(new SortBySumLength());
-		
-		for(List<Marking> combination : list)
-		{
-			printCombination("", combination);
-		}
+		List<Sample> sortedSamples = new ArrayList<>(solution.stream().toList());
+		sortedSamples.sort(new SortBySumLength());
+		sortedSamples.forEach(System.out::print);
 	}
 	
 	public void calculateSingleMaterial(List<Marking> markings) // Выполняет все расчеты для одного материала
 	{
-		List<Marking> sample = new ArrayList<>();
+		Sample sample = new Sample();
 		int sum = 0;
 		int maxLen = markings.get(0).material.length;
 		
@@ -71,24 +68,32 @@ public class Calculator
 				if(sum + m.length > maxLen) // Маленькая не подходит, значит доска уже забита
 				{
 					solution.add(sample);
-					sample = new ArrayList<>();
+					sample = new Sample();
 					statistics.combinations++;
 					sum = 0;
 				}
 				else // Для маленькой есть место
 				{
-					sample.add(m);
+					sample.addMark(m);
 					sum += m.length;
 					markings.remove(m);
 				}
 			}
 			else // Для частой есть место
 			{
-				sample.add(m);
+				sample.addMark(m);
 				sum += m.length;
 				markings.remove(m);
 			}
 		}
+	}
+	
+	private void optimisation(List<Marking> markings)
+	{
+		Collections.reverse(markings);
+		
+		Map<Integer, List<Marking>> needToChange = new HashMap<>();
+		
 	}
 	
 	private Marking getSmallestMark(List<Marking> markings)
@@ -103,20 +108,6 @@ public class Calculator
 		return markings.get(0);
 	}
 	
-	
-	private void printCombination(String info, List<Marking> sample)
-	{
-		System.out.print(info + sample.get(0).material.length);
-		
-		int sum = 0;
-		for(Marking marking : sample)
-		{
-			sum += marking.length;
-			System.out.print(" - " + marking.length);
-		}
-		
-		System.out.print(" = " + (sample.get(0).material.length - sum) + "\n");
-	}
 	
 	public void splitMarkings()
 	{

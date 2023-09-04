@@ -12,4 +12,10 @@ public class Marking implements Comparable<Marking>
 	{
 		return compare.length - length;
 	}
+	
+	@Override
+	public String toString()
+	{
+		return "Marking{" + "name= '" + name + '\'' + ", material= " + material + ", length= " + length + '}';
+	}
 }
