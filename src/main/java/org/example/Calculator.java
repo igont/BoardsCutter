@@ -1,6 +1,8 @@
 package org.example;
 
-import org.example.Comparators.SortBySumLength;
+import org.example.Comparators.Markings.SortMarksByAmount;
+import org.example.Comparators.Markings.SortMarksByLength;
+import org.example.Comparators.Print.SortBySumLength;
 import org.example.DataTypes.Marking;
 import org.example.DataTypes.Material;
 import org.example.DataTypes.Statistics;
@@ -9,11 +11,10 @@ import java.util.*;
 
 public class Calculator
 {
-	public Set<List<Marking>> allowedCombinations = new HashSet<>();
+	public List<List<Marking>> solution = new ArrayList<>();
 	public List<Material> materials;
 	public List<Marking> markings;
 	public List<List<Marking>> splitMarkings = new ArrayList<>();
-	public int allowedAmount = 500;
 	public Statistics statistics = new Statistics();
 	
 	public Calculator(List<Material> materials, List<Marking> markings)
@@ -31,8 +32,6 @@ public class Calculator
 		for(List<Marking> markings1 : splitMarkings)
 		{
 			calculateSingleMaterial(markings1);
-			System.out.println("Выполнен расчет для материала: " + markings1.get(0).material.name);
-			System.out.println();
 		}
 		
 		long endTime = System.nanoTime();
@@ -40,14 +39,13 @@ public class Calculator
 		
 		statistics.durationMillis = duration / 1000f;
 		
-		//printResults();
+		printResults();
 		return statistics;
 	}
 	
 	private void printResults()
 	{
-		
-		List<List<Marking>> list = new ArrayList<>(allowedCombinations.stream().toList());
+		List<List<Marking>> list = new ArrayList<>(solution.stream().toList());
 		list.sort(new SortBySumLength());
 		
 		for(List<Marking> combination : list)
@@ -59,48 +57,52 @@ public class Calculator
 	public void calculateSingleMaterial(List<Marking> markings) // Выполняет все расчеты для одного материала
 	{
 		List<Marking> sample = new ArrayList<>();
-		addNewMark(sample, markings);
+		int sum = 0;
+		int maxLen = markings.get(0).material.length;
+		
+		while(!markings.isEmpty())
+		{
+			Marking m = getMark(markings); // Пытаемся добавить самые частые марки
+			
+			if(sum + m.length > maxLen) // Частая не подходит, пробуем самую маленькую
+			{
+				m = getSmallestMark(markings);
+				
+				if(sum + m.length > maxLen) // Маленькая не подходит, значит доска уже забита
+				{
+					solution.add(sample);
+					sample = new ArrayList<>();
+					statistics.combinations++;
+					sum = 0;
+				}
+				else // Для маленькой есть место
+				{
+					sample.add(m);
+					sum += m.length;
+					markings.remove(m);
+				}
+			}
+			else // Для частой есть место
+			{
+				sample.add(m);
+				sum += m.length;
+				markings.remove(m);
+			}
+		}
 	}
 	
-	private void addNewMark(List<Marking> sample, List<Marking> markings) // Добавляет к существующей раскладке каждую из марок набора
+	private Marking getSmallestMark(List<Marking> markings)
 	{
-		for(Marking marking : markings)
-		{
-			List<Marking> sampleNew = new ArrayList<>(sample);
-			sampleNew.add(marking);
-			
-			checkRest(sampleNew, markings);
-			
-			statistics.combinations++;
-		}
+		markings.sort(new SortMarksByLength());
+		return markings.get(0);
 	}
 	
-	private void checkRest(List<Marking> sample, List<Marking> markings) // Проверяет оставшуюся длину и решает что делать с набором марок
+	private Marking getMark(List<Marking> markings)
 	{
-		int matLength = sample.get(0).material.length;
-		int sampleLength = 0;
-		
-		for(Marking marking : sample)
-		{
-			sampleLength += marking.length;
-		}
-		int amount = matLength - sampleLength;
-		
-		if(amount < 0)
-		{
-			//printCombination("[BAD]", sample);
-		}
-		else if(amount < allowedAmount)
-		{
-			Collections.sort(sample);
-			allowedCombinations.add(sample);
-		}
-		else
-		{
-			//printCombination("[CONTINUE]", sample);
-			addNewMark(sample, markings);
-		}
+		markings.sort(new SortMarksByAmount());
+		return markings.get(0);
 	}
+	
 	
 	private void printCombination(String info, List<Marking> sample)
 	{
@@ -125,7 +127,8 @@ public class Calculator
 			
 			for(Marking mark : markings)
 			{
-				if(mark.material == mat) splitMarkings.get(count).add(mark);
+				for(int i = 0; i < mark.amount; i++)
+					if(mark.material == mat) splitMarkings.get(count).add(mark);
 			}
 			count++;
 		}
